@@ -1,0 +1,63 @@
+题目描述：
+已知 1 <= a < b < 100000000，求得a+...+b过程中进位的次数是多少?
+
+#include <iostream>
+using namespace std;
+/**
+思路：
+    计算0~b中1的总个数，计算0~(a-1)中1的总个数，相减即得a~b中1的总数 count；
+    再计算a+...+b的和的1的个数 temp;求和公式为(b+a)*(b-a+1)/2
+    那进位次数为： count - temp;
+*/
+
+unsigned int NumberBit(long long n)
+{
+    unsigned int count = 0;
+    // 求一个二进制中的个数，通过 n = n&(n-1) 知道为0，与计算的次数就是1的个数
+    while (n) {
+        count++;
+        n &= (n - 1);
+    }
+    return count;
+}
+
+
+int main()
+{
+    unsigned int a, b;
+    cin >> a >> b;
+    a--;
+    long long count = 0;
+    for(int i = 0; i < 31; i++) {
+        // 从右边开始，在第 i 位上的循环间隔
+        unsigned int loop = 2 * (1 << i);
+        
+        // 每次循环一半是0，一半是1, 0和1的个数为(loop/2)
+        unsigned int numsOfOne = loop / 2;
+        unsigned int numsOfZero = loop / 2;
+        
+        // a的完整循环次数为((a + 1) / loop), 未循环完的次数为((a + 1) % loop)
+        unsigned int remain = 0;
+        if(((a + 1) % loop) > numsOfZero) {
+            remain = (a + 1) % loop - numsOfZero;
+        }
+        unsigned int ai = ((a + 1) / loop) * numsOfOne + remain;
+        
+        // b的完整循环次数为((b + 1) / loop), 未循环完的次数为((b + 1) % loop)，
+        remain = 0;
+        if ((b + 1) % loop > numsOfZero) {
+            remain = (b + 1) % loop - numsOfZero;
+        }
+        unsigned int bi = ((b + 1) / loop) * numsOfOne + remain;
+        
+        count += bi - ai;
+    }
+    
+    // 计算a+...+b的和中1的个数
+    a++;
+    long long temp = ((long long)a + b) * (b - a + 1) / 2;
+    count -= NumberBit(temp);
+    cout << count << endl;
+    return 0;
+    
+}
